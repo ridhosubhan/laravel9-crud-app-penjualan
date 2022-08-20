@@ -138,9 +138,6 @@ class TransaksiController extends Controller
 
     public function bayarBarangStore(Request $request)
     {
-        // // PINDAHIN TABEL KERANJANG KE DETAIL TRANSAKSI
-        // $getallKeranjang = KeranjangModel::get();
-        // dd($getallKeranjang);
 
         $validatedData = $request->validate([
             'txt_bayar' => 'required',
@@ -171,6 +168,11 @@ class TransaksiController extends Controller
             $changestatusbarang = BarangModel::where('id', $g['nama_barang'])->update([
                 'status_keranjang' => 0,
             ]);
+
+            // $changeStokbarang = StokBarangModel::where('barang_id', $g['nama_barang'])->update([
+            //     'stok' => 'stok'-$g['kuantiti'],
+            // ]);
+            $changeStokbarang = DB::table('tb_stok')->where('barang_id', $g['nama_barang'])->decrement('stok', $g['kuantiti']);
         }
 
         $deleteKeranjang = KeranjangModel::truncate();
