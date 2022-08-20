@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 19, 2022 at 05:17 PM
+-- Generation Time: Aug 20, 2022 at 09:59 AM
 -- Server version: 10.4.24-MariaDB
 -- PHP Version: 8.1.6
 
@@ -57,7 +57,13 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (1, '2014_10_12_000000_create_users_table', 1),
 (2, '2014_10_12_100000_create_password_resets_table', 1),
 (3, '2019_08_19_000000_create_failed_jobs_table', 1),
-(4, '2019_12_14_000001_create_personal_access_tokens_table', 1);
+(4, '2019_12_14_000001_create_personal_access_tokens_table', 1),
+(5, '2022_08_19_151818_create_barang_models_table', 1),
+(6, '2022_08_19_152521_create_detail_transaksi_models_table', 1),
+(7, '2022_08_19_152533_create_transaksi_models_table', 2),
+(8, '2022_08_19_152604_create_kategori_barang_models_table', 2),
+(9, '2022_08_19_152622_create_stok_barang_models_table', 3),
+(10, '2022_08_20_090630_create_keranjang_models_table', 4);
 
 -- --------------------------------------------------------
 
@@ -97,19 +103,23 @@ CREATE TABLE `personal_access_tokens` (
 --
 
 CREATE TABLE `tb_barang` (
-  `id` int(11) NOT NULL,
-  `nama_barang` varchar(255) NOT NULL,
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `nama_barang` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `harga` int(11) NOT NULL,
-  `jenis_barang_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `jenis_barang_id` int(11) NOT NULL,
+  `status_keranjang` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `tb_barang`
 --
 
-INSERT INTO `tb_barang` (`id`, `nama_barang`, `harga`, `jenis_barang_id`) VALUES
-(1, 'Sikat Gigi', 20000, 1),
-(6, 'Buku', 100000000, 1);
+INSERT INTO `tb_barang` (`id`, `nama_barang`, `harga`, `jenis_barang_id`, `status_keranjang`, `created_at`, `updated_at`) VALUES
+(2, 'Sabun mandi Bersulfur', 90000, 1, 0, '2022-08-20 02:13:59', '2022-08-20 07:58:09'),
+(3, 'Palu', 25000, 4, 0, '2022-08-20 02:42:15', '2022-08-20 07:01:17'),
+(4, 'Shampoo', 5000, 3, 0, '2022-08-20 02:43:34', '2022-08-20 07:50:21');
 
 -- --------------------------------------------------------
 
@@ -118,32 +128,59 @@ INSERT INTO `tb_barang` (`id`, `nama_barang`, `harga`, `jenis_barang_id`) VALUES
 --
 
 CREATE TABLE `tb_detail_transaksi` (
-  `id` int(11) NOT NULL,
+  `id` bigint(20) UNSIGNED NOT NULL,
   `transaksi_id` int(11) NOT NULL,
   `barang_id` int(11) NOT NULL,
   `kuantiti` int(11) NOT NULL,
-  `total` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `total` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `tb_detail_transaksi`
+--
+
+INSERT INTO `tb_detail_transaksi` (`id`, `transaksi_id`, `barang_id`, `kuantiti`, `total`, `created_at`, `updated_at`) VALUES
+(14, 16, 2, 1, 90000, '2022-08-20 07:58:09', '2022-08-20 07:58:09');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tb_jenis_barang`
+-- Table structure for table `tb_kategori_barang`
 --
 
-CREATE TABLE `tb_jenis_barang` (
-  `id` int(11) NOT NULL,
-  `jenis_barang` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `tb_kategori_barang` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `kategori_barang` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `tb_jenis_barang`
+-- Dumping data for table `tb_kategori_barang`
 --
 
-INSERT INTO `tb_jenis_barang` (`id`, `jenis_barang`) VALUES
-(1, 'Kosmetik'),
-(2, 'Alat Mandi'),
-(4, 'Alat Kecantikan');
+INSERT INTO `tb_kategori_barang` (`id`, `kategori_barang`, `created_at`, `updated_at`) VALUES
+(1, 'Alat Kecantikan', '2022-08-19 08:35:26', '2022-08-19 08:35:26'),
+(3, 'Alat Mandi', '2022-08-20 02:41:32', '2022-08-20 02:41:32'),
+(4, 'Alat Pertukangan', '2022-08-20 02:41:37', '2022-08-20 02:41:37');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tb_keranjang`
+--
+
+CREATE TABLE `tb_keranjang` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `transaksi_id` int(11) DEFAULT NULL,
+  `nama_barang` int(11) NOT NULL,
+  `kuantiti` int(11) NOT NULL,
+  `total` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -152,17 +189,21 @@ INSERT INTO `tb_jenis_barang` (`id`, `jenis_barang`) VALUES
 --
 
 CREATE TABLE `tb_stok` (
-  `id` int(11) NOT NULL,
+  `id` bigint(20) UNSIGNED NOT NULL,
   `stok` int(11) NOT NULL,
-  `barang_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `barang_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `tb_stok`
 --
 
-INSERT INTO `tb_stok` (`id`, `stok`, `barang_id`) VALUES
-(1, 20, 1);
+INSERT INTO `tb_stok` (`id`, `stok`, `barang_id`, `created_at`, `updated_at`) VALUES
+(2, 6, 2, '2022-08-20 02:13:59', '2022-08-20 05:59:08'),
+(3, 20, 3, '2022-08-20 02:42:15', '2022-08-20 02:42:15'),
+(4, 12, 4, '2022-08-20 02:43:34', '2022-08-20 02:43:34');
 
 -- --------------------------------------------------------
 
@@ -171,11 +212,20 @@ INSERT INTO `tb_stok` (`id`, `stok`, `barang_id`) VALUES
 --
 
 CREATE TABLE `tb_transaksi` (
-  `id` int(11) NOT NULL,
-  `tanggal` date NOT NULL,
-  `nama_pelanggan` varchar(100) NOT NULL,
-  `grand_total` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `no_transaksi` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tanggal` datetime DEFAULT NULL,
+  `grand_total` int(11) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `tb_transaksi`
+--
+
+INSERT INTO `tb_transaksi` (`id`, `no_transaksi`, `tanggal`, `grand_total`, `created_at`, `updated_at`) VALUES
+(16, 'TRN-001', '2022-08-20 14:58:09', 90000, '2022-08-20 07:58:09', '2022-08-20 07:58:09');
 
 -- --------------------------------------------------------
 
@@ -238,9 +288,15 @@ ALTER TABLE `tb_detail_transaksi`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `tb_jenis_barang`
+-- Indexes for table `tb_kategori_barang`
 --
-ALTER TABLE `tb_jenis_barang`
+ALTER TABLE `tb_kategori_barang`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `tb_keranjang`
+--
+ALTER TABLE `tb_keranjang`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -276,7 +332,7 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `personal_access_tokens`
@@ -288,31 +344,37 @@ ALTER TABLE `personal_access_tokens`
 -- AUTO_INCREMENT for table `tb_barang`
 --
 ALTER TABLE `tb_barang`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `tb_detail_transaksi`
 --
 ALTER TABLE `tb_detail_transaksi`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
--- AUTO_INCREMENT for table `tb_jenis_barang`
+-- AUTO_INCREMENT for table `tb_kategori_barang`
 --
-ALTER TABLE `tb_jenis_barang`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+ALTER TABLE `tb_kategori_barang`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `tb_keranjang`
+--
+ALTER TABLE `tb_keranjang`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `tb_stok`
 --
 ALTER TABLE `tb_stok`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `tb_transaksi`
 --
 ALTER TABLE `tb_transaksi`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `users`
