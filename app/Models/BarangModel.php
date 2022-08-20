@@ -15,5 +15,6 @@ class BarangModel extends Model
         'nama_barang',
         'harga',
         'jenis_barang_id',
+        'status_keranjang',
     ];
 }

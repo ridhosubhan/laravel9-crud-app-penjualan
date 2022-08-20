@@ -21,6 +21,7 @@ class BarangController extends Controller
     {
         $data = BarangModel::join('tb_kategori_barang', 'tb_barang.jenis_barang_id', '=', 'tb_kategori_barang.id')
                 ->join('tb_stok', 'tb_stok.barang_id', '=', 'tb_barang.id')
+                ->orderBy('tb_barang.id', 'DESC')
                 ->get(['tb_barang.*', 'tb_kategori_barang.kategori_barang', 'tb_stok.stok']);
 
         return view('barang.index', ['data' => $data]);
@@ -64,7 +65,8 @@ class BarangController extends Controller
         $savebarang = BarangModel::create([
             'nama_barang' => $request->input('txt_barang'),
             'harga' => $request->input('txt_harga'),
-            'jenis_barang_id' => $request->input('txt_kategori_barang')
+            'jenis_barang_id' => $request->input('txt_kategori_barang'),
+            'status_keranjang' => '0'
         ]);
 
         if($savebarang){

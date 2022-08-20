@@ -32,6 +32,11 @@ Route::post('/kategori-barang/update/{id}', [KategoriBarangController::class,'up
 Route::delete('/kategori-barang/delete/{id}', [KategoriBarangController::class,'destroy']);
 
 Route::get('/transaksi', [TransaksiController::class, 'index'])->name('/transaksi');
+Route::get('/transaksi/add-barang/{id}', [TransaksiController::class, 'addBarang']);
+Route::get('/transaksi/update-barang/{id}', [TransaksiController::class, 'updateBarang']);
+Route::post('/transaksi/update-barang/store', [TransaksiController::class, 'updateBarangStore'])->name('/transaksi/update-barang/store');
+Route::get('/transaksi/delete-barang/{id}', [TransaksiController::class, 'destroy']);
+
 
 Route::get('/', function () {
     return view('index');

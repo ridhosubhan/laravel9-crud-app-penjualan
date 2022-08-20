@@ -5,6 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
+use Illuminate\Support\Facades\DB;
+
+use App\Models\BarangModel;
+use App\Models\StokBarangModel;
+use App\Models\KategoriBarangModel;
+use App\Models\TransaksiModel;
+use App\Models\KeranjangModel;
+
 class TransaksiController extends Controller
 {
     /**
@@ -14,8 +22,53 @@ class TransaksiController extends Controller
      */
     public function index()
     {
+        function kodeTransaksi(){
+            // mengambil data barang dengan kode paling besar
+            // $query = mysqli_query($koneksi, "SELECT max(kode) as kodeTerbesar FROM barang");
+            $query = DB::table('tb_transaksi')
+                    ->selectRaw('max(no_transaksi) as kodeTerbesar')
+                    ->first();
+
+            $kodeBarang = $query->kodeTerbesar;
+
+            // mengambil angka dari kode barang terbesar, menggunakan fungsi substr
+            // dan diubah ke integer dengan (int)
+            $urutan = (int) substr($kodeBarang, 3, 3);
+
+            // bilangan yang diambil ini ditambah 1 untuk menentukan nomor urut berikutnya
+            $urutan++;
+
+            // membentuk kode barang baru
+            // perintah sprintf("%03s", $urutan); berguna untuk membuat string menjadi 3 karakter
+            // misalnya perintah sprintf("%03s", 15); maka akan menghasilkan '015'
+            // angka yang diambil tadi digabungkan dengan kode huruf yang kita inginkan, misalnya BRG
+            $huruf = "TRN-";
+            $kodeBarang = $huruf . sprintf("%03s", $urutan);
+            return $kodeBarang;
+        }
+
+        $kodetrans = kodeTransaksi();
+
+        $caribarang = BarangModel::join('tb_kategori_barang', 'tb_barang.jenis_barang_id', '=', 'tb_kategori_barang.id')
+            ->join('tb_stok', 'tb_stok.barang_id', '=', 'tb_barang.id')
+            ->where('tb_stok.stok','>', '0')
+            ->where('tb_barang.status_keranjang','=', '0')
+            ->get(['tb_barang.*', 'tb_kategori_barang.kategori_barang', 'tb_stok.stok']);
+
         $tanggal = Carbon::now()->format('d-m-Y H:i:s');
-        return view('transaksi.index', ['tanggal' => $tanggal]);
+
+        $transaksibarang = BarangModel::join('tb_stok', 'tb_stok.barang_id', '=', 'tb_barang.id')
+            ->join('tb_keranjang', 'tb_keranjang.nama_barang', '=', 'tb_barang.id')
+            ->where('tb_barang.status_keranjang','=', '1')
+            ->get(['tb_barang.*', 'tb_keranjang.id as KeranjangID', 'tb_keranjang.kuantiti', 'tb_keranjang.total', 'tb_stok.stok']);
+
+        return view('transaksi.index',
+            [
+                'kodetrans' =>$kodetrans,
+                'caribarang' => $caribarang,
+                'tanggal' => $tanggal,
+                'transaksibarang' => $transaksibarang,
+            ]);
     }
 
     /**
@@ -23,7 +76,62 @@ class TransaksiController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+
+    public function addBarang(Request $request, $id)
+    {
+
+        $barang = BarangModel::join('tb_kategori_barang', 'tb_barang.jenis_barang_id', '=', 'tb_kategori_barang.id')
+                ->join('tb_stok', 'tb_stok.barang_id', '=', 'tb_barang.id')
+                ->where('tb_barang.id','=', $id)
+                ->first(['tb_barang.*', 'tb_kategori_barang.kategori_barang', 'tb_stok.stok', 'tb_stok.id as stok_id']);
+
+        $editkeranjangbarang = BarangModel::where('id', $request->id)->update([
+            'status_keranjang' => '1'
+        ]);
+
+        if($editkeranjangbarang){
+            $savekeranjang = KeranjangModel::create([
+                'nama_barang' => $barang->id,
+                'kuantiti' => '1',
+                'total' => $barang->harga,
+            ]);
+        }
+
+        return redirect('/transaksi');
+    }
+
+    public function updateBarang(Request $request, $id)
+    {
+        if ($request->ajax()) {
+            $datakeranjang = BarangModel::join('tb_keranjang', 'tb_barang.id', '=', 'tb_keranjang.nama_barang')
+                    ->join('tb_stok', 'tb_stok.barang_id', '=', 'tb_barang.id')
+                    ->where('tb_keranjang.id', $id)
+                    ->first(['tb_barang.nama_barang as nm_barang', 'tb_barang.harga as harga_barang', 'tb_keranjang.*']);
+
+            return response()->json($datakeranjang);
+        }
+    }
+
+    public function updateBarangStore(Request $request)
+    {
+            $datakeranjang = BarangModel::join('tb_keranjang', 'tb_barang.id', '=', 'tb_keranjang.nama_barang')
+                    ->join('tb_stok', 'tb_stok.barang_id', '=', 'tb_barang.id')
+                    ->where('tb_keranjang.id', $request->txt_id_keranjang)
+                    ->first(['tb_barang.nama_barang as nm_barang', 'tb_barang.harga as harga_barang', 'tb_keranjang.*']);
+
+            $harga = $datakeranjang->harga_barang;
+            $kuantiti = $request->txt_jumlah_belibarang;
+            $total = ($harga*$kuantiti);
+
+            $editkeranjang = KeranjangModel::where('id', $request->txt_id_keranjang)->update([
+                'kuantiti' => $kuantiti,
+                'total' => $total,
+            ]);
+
+            return response()->json(['success'=>'Berhasil Merubah Data !']);
+    }
+
+    public function create(Request $request)
     {
         //
     }
@@ -81,6 +189,14 @@ class TransaksiController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $databarang = BarangModel::join('tb_keranjang', 'tb_barang.id', '=', 'tb_keranjang.nama_barang')
+                ->where('tb_keranjang.id', $id)
+                ->first(['tb_barang.id as barang_id', 'tb_barang.nama_barang as nm_barang', 'tb_barang.status_keranjang as status_keranjang', 'tb_keranjang.*']);
+
+        $updatestatuskeranjang = BarangModel::where('id', $databarang->barang_id)->update([
+            'status_keranjang' => 0
+        ]);
+        KeranjangModel::find($id)->delete();
+        return response()->json(['success'=>'Berhasil Menghapus Data !']);
     }
 }
