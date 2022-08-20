@@ -17,7 +17,7 @@ $title='Home';
                     <div class="mb-3">
                     </div>
                     <div class="table-responsive">
-                        <table border="0" cellspacing="5" cellpadding="5">
+                        <table class="table table-bordered" style="width: 20%;" cellspacing="5" cellpadding="5">
                             <tbody><tr>
                                 <td>Dari Tanggal:</td>
                                 <td><input type="text" id="min" name="min"></td>
@@ -77,6 +77,9 @@ $title='Home';
             var max = maxDate.val();
             var date = new Date( data[4] );
 
+            console.log(min);
+            console.log(max);
+            console.log(date);
             if (
                 ( min === null && max === null ) ||
                 ( min === null && date <= max ) ||
