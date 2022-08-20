@@ -37,6 +37,7 @@ Route::get('/transaksi/update-barang/{id}', [TransaksiController::class, 'update
 Route::post('/transaksi/update-barang/store', [TransaksiController::class, 'updateBarangStore'])->name('/transaksi/update-barang/store');
 Route::get('/transaksi/delete-barang/{id}', [TransaksiController::class, 'destroy']);
 
+Route::post('/transaksi/bayar-barang/store', [TransaksiController::class, 'bayarBarangStore'])->name('/transaksi/bayar-barang/store');
 
 Route::get('/', function () {
     return view('index');

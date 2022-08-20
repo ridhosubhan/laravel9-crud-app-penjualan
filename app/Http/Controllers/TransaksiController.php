@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 use Illuminate\Support\Facades\DB;
 
@@ -62,12 +63,15 @@ class TransaksiController extends Controller
             ->where('tb_barang.status_keranjang','=', '1')
             ->get(['tb_barang.*', 'tb_keranjang.id as KeranjangID', 'tb_keranjang.kuantiti', 'tb_keranjang.total', 'tb_stok.stok']);
 
+        $grand_total = KeranjangModel::get()->sum('total');
+
         return view('transaksi.index',
             [
                 'kodetrans' =>$kodetrans,
                 'caribarang' => $caribarang,
                 'tanggal' => $tanggal,
                 'transaksibarang' => $transaksibarang,
+                'grand_total' => $grand_total,
             ]);
     }
 
@@ -130,6 +134,31 @@ class TransaksiController extends Controller
 
             return response()->json(['success'=>'Berhasil Merubah Data !']);
     }
+
+    public function bayarBarangStore(Request $request)
+    {
+        $validatedData = $request->validate([
+            'txt_bayar' => 'required',
+        ],
+        [
+            'txt_bayar.required' => 'Wajib Diisi !!',
+        ]);
+
+        $savetransaksi = TransaksiModel::create([
+            'no_transaksi' => $request->input('txt_tanggal'),
+            'tanggal' => Carbon::now(),
+            'grand_total' => $request->input('txt_grand_total'),
+        ]);
+
+        $transaksi_id = TransaksiModel::latest()->first();
+        $editkeranjang = KeranjangModel::where('id', $request->txt_id_keranjang)->update([
+            'kuantiti' => $transaksi_id->id,
+        ]);
+
+
+        return redirect('/transaksi')->with('success','Berhasil menambahkan transaksi');
+    }
+
 
     public function create(Request $request)
     {

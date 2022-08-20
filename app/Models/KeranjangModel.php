@@ -12,6 +12,7 @@ class KeranjangModel extends Model
 
     protected $fillable = [
         'nama_barang',
+        'transaksi_id',
         'kuantiti',
         'total',
     ];

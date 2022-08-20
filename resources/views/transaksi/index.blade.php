@@ -84,7 +84,7 @@ $title='Kategori Barang';
                     </div>
 
                     <hr>
-                    <form class="form-control mb-2" action="{{route('/barang')}}" method="POST">
+                    <form class="form-control mb-2" action="{{route('/transaksi/bayar-barang/store')}}" method="POST">
                         {{ csrf_field() }}
                         <div class="row">
                             <div class="col-sm-6">
@@ -109,7 +109,7 @@ $title='Kategori Barang';
                                 <div class="form-group row">
                                 <label for="staticEmail" class="col-sm-4 col-form-label">Grand Total</label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control" name="txt_grand_total" id="txt_grand_total" placeholder="Grand Total" readonly>
+                                        <input type="number" class="form-control" value={{$grand_total}} name="txt_grand_total" id="txt_grand_total" placeholder="Grand Total" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -117,14 +117,17 @@ $title='Kategori Barang';
                                 <div class="form-group row">
                                 <label for="staticEmail" class="col-sm-4 col-form-label">Bayar</label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control" name="txt_bayar" id="txt_bayar" placeholder="Nominal Bayar">
+                                        <input type="number" value="{{old('txt_bayar')}}" class="form-control txt_bayar @error('txt_bayar')is-invalid @enderror" name="txt_bayar" id="txt_bayar" placeholder="Nominal Bayar">
+                                        @error('txt_bayar')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="row mt-3">
                             <div class="col-sm-12 text-end">
-                                <button type="button" class="btn btn-primary">Bayar</button>
+                                <button type="submit" class="btn btn-primary">Bayar</button>
                                 </div>
                             </div>
                         </div>
@@ -276,6 +279,16 @@ $title='Kategori Barang';
         }
       })
   });
+
+    $(".txt_bayar").blur(function() {
+        var Bayar = parseFloat($(".txt_bayar").val());
+        var Total = parseFloat($("#txt_grand_total").val());
+        if(Bayar < Total){
+            alert('Mohon maaf nominal kurang');
+            $("#txt_bayar").val('');
+        }
+    });
+
 });
 
 
