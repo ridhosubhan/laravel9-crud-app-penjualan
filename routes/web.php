@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\KategoriBarangController;
 use App\Http\Controllers\TransaksiController;
@@ -16,6 +17,9 @@ use App\Http\Controllers\TransaksiController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::get('/', [HomeController::class, 'index'])->name('/');
+
 
 Route::get('/barang', [BarangController::class, 'index'])->name('/barang');
 Route::get('/barang/tambah-data', [BarangController::class, 'create'])->name('/barang/tambah-data');
@@ -38,7 +42,3 @@ Route::post('/transaksi/update-barang/store', [TransaksiController::class, 'upda
 Route::get('/transaksi/delete-barang/{id}', [TransaksiController::class, 'destroy']);
 
 Route::post('/transaksi/bayar-barang/store', [TransaksiController::class, 'bayarBarangStore'])->name('/transaksi/bayar-barang/store');
-
-Route::get('/', function () {
-    return view('index');
-});
