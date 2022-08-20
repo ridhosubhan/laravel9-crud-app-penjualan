@@ -12,6 +12,7 @@ use App\Models\BarangModel;
 use App\Models\StokBarangModel;
 use App\Models\KategoriBarangModel;
 use App\Models\TransaksiModel;
+use App\Models\DetailTransaksiModel;
 use App\Models\KeranjangModel;
 
 class TransaksiController extends Controller
@@ -137,6 +138,10 @@ class TransaksiController extends Controller
 
     public function bayarBarangStore(Request $request)
     {
+        // // PINDAHIN TABEL KERANJANG KE DETAIL TRANSAKSI
+        // $getallKeranjang = KeranjangModel::get();
+        // dd($getallKeranjang);
+
         $validatedData = $request->validate([
             'txt_bayar' => 'required',
         ],
@@ -145,18 +150,33 @@ class TransaksiController extends Controller
         ]);
 
         $savetransaksi = TransaksiModel::create([
-            'no_transaksi' => $request->input('txt_tanggal'),
+            'no_transaksi' => $request->input('txt_notransaksi'),
             'tanggal' => Carbon::now(),
             'grand_total' => $request->input('txt_grand_total'),
         ]);
 
         $transaksi_id = TransaksiModel::latest()->first();
-        $editkeranjang = KeranjangModel::where('id', $request->txt_id_keranjang)->update([
-            'kuantiti' => $transaksi_id->id,
-        ]);
 
+        // PINDAHIN TABEL KERANJANG KE DETAIL TRANSAKSI
+        $getallKeranjang = KeranjangModel::get();
+
+        foreach ($getallKeranjang as $g){
+            $savedetailtransaksi = DetailTransaksiModel::create([
+                'transaksi_id' => $transaksi_id->id,
+                'barang_id' => $g['nama_barang'],
+                'kuantiti' => $g['kuantiti'],
+                'total' => $g['total']
+            ]);
+
+            $changestatusbarang = BarangModel::where('id', $g['nama_barang'])->update([
+                'status_keranjang' => 0,
+            ]);
+        }
+
+        $deleteKeranjang = KeranjangModel::truncate();
 
         return redirect('/transaksi')->with('success','Berhasil menambahkan transaksi');
+
     }
 
 
